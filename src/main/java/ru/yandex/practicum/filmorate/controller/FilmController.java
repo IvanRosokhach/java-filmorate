@@ -16,9 +16,9 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private int idGenerator = 1;
+    private long idGenerator = 1;
     private static final LocalDate startCinema = LocalDate.of(1895, 12, 28);
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
     public List<Film> findAllFilms() {

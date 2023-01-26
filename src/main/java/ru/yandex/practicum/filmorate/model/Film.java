@@ -11,8 +11,7 @@ import java.time.LocalDate;
 @Data
 public class Film {
 
-    private int id;
-    @NotNull
+    private long id;
     @NotBlank(message = "Название не может быть пустым.")
     private final String name;
     @Size(max = 200, message = "Максимальная длина описания — 200 символов.")
