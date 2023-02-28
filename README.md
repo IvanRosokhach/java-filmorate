@@ -23,6 +23,6 @@ FROM film
 WHERE film_id IN (SELECT film_id
                   FROM likes
                   GROUP BY film_id
-                  ORDER BY AVG(user_id) DESC
+                  ORDER BY COUNT(user_id) DESC
                   LIMIT 10);
 ```
