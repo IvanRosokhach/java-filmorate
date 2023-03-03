@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,14 +30,12 @@ public class UserService {
 
     public User createUser(User user) {
         validate(user);
-        userStorage.createUser(user);
-        return user;
+        return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
         validate(user);
-        userStorage.updateUser(user);
-        return user;
+        return userStorage.updateUser(user);
     }
 
     public void deleteUser(int id) {
@@ -51,33 +46,19 @@ public class UserService {
     }
 
     public void addFriend(int id, int friendId) {
-        userStorage.findUser(id).getFriends().add((long) friendId);
-        userStorage.findUser(friendId).getFriends().add((long) id);
-        log.info("Пользователи с id: {} и {} стали друзьями.", id, friendId);
+        userStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(int id, int friendId) {
-        userStorage.findUser(id).getFriends().remove(userStorage.findUser(friendId).getId());
-        userStorage.findUser(friendId).getFriends().remove(userStorage.findUser(id).getId());
-        log.info("Пользователь удален из списка друзей.");
+        userStorage.deleteFriend(id, friendId);
     }
 
-    public List<User> getFriends(int id) {
-        List<User> userFriends = new ArrayList<>();
-        findAllUsers().forEach(user -> userStorage.findUser(id).getFriends().stream()
-                .filter(idList -> user.getId() == idList)
-                .map(idList -> user)
-                .forEach(userFriends::add));
-        log.info("Количество друзей у пользователя {}: {}.", userStorage.findUser(id).getName(), userFriends.size());
-        return userFriends;
+    public Collection<User> getFriends(int id) {
+        return userStorage.getFriends(id);
     }
 
-    public List<User> getCommonFriends(int id, int otherId) {
-        List<User> commonFriends = getFriends(id).stream()
-                .filter(getFriends(otherId)::contains)
-                .collect(Collectors.toList());
-        log.info("Количество общих друзей: {}.", commonFriends.size());
-        return commonFriends;
+    public Collection<User> getCommonFriends(int id, int otherId) {
+        return userStorage.getCommonFriends(id, otherId);
     }
 
     private void validate(User user) {

@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -57,6 +60,39 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Пользователь с id = {} не найден.", id);
             throw new NotFoundException("Пользователь не найден.");
         }
+    }
+
+    @Override
+    public void addFriend(long id, long friendId) {
+        findUser(id).getFriends().add((long) friendId);
+        findUser(friendId).getFriends().add((long) id);
+        log.info("Пользователи с id: {} и {} стали друзьями.", id, friendId);
+    }
+
+    @Override
+    public void deleteFriend(long id, long friendId) {
+        findUser(id).getFriends().remove(findUser(friendId).getId());
+        findUser(friendId).getFriends().remove(findUser(id).getId());
+        log.info("Пользователь удален из списка друзей.");
+    }
+
+    @Override
+    public Collection<User> getFriends(long id) {
+        List<User> userFriends = new ArrayList<>();
+        findAllUsers().forEach(user -> findUser(id).getFriends().stream()
+                .filter(idList -> user.getId() == idList)
+                .map(idList -> user)
+                .forEach(userFriends::add));
+        log.info("Количество друзей у пользователя {}: {}.", findUser(id).getName(), userFriends.size());
+        return userFriends;
+    }
+
+    public Collection<User> getCommonFriends(long id, long otherId) {
+        List<User> commonFriends = getFriends(id).stream()
+                .filter(getFriends(otherId)::contains)
+                .collect(Collectors.toList());
+        log.info("Количество общих друзей: {}.", commonFriends.size());
+        return commonFriends;
     }
 
 }
