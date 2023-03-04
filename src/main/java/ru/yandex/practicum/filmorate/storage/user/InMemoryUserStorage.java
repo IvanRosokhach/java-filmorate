@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+//@Primary
 public class InMemoryUserStorage implements UserStorage {
 
     private long idGenerator = 1;
@@ -65,14 +67,14 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addFriend(long id, long friendId) {
         findUser(id).getFriends().add((long) friendId);
-        findUser(friendId).getFriends().add((long) id);
+        findUser(friendId);
         log.info("Пользователи с id: {} и {} стали друзьями.", id, friendId);
     }
 
     @Override
     public void deleteFriend(long id, long friendId) {
         findUser(id).getFriends().remove(findUser(friendId).getId());
-        findUser(friendId).getFriends().remove(findUser(id).getId());
+        findUser(friendId);
         log.info("Пользователь удален из списка друзей.");
     }
 

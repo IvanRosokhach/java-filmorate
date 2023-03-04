@@ -94,8 +94,13 @@ public class UserDbStorage implements UserStorage {
         if (!exists(friendId)) {
             throw new NotFoundException("Пользователь с идентификатором " + friendId + " не найден.");
         }
+        boolean isFriends = false;
+        if (checkFriend(friendId, id) == true) {
+            isFriends = true;
+            changeStatus(friendId, id);
+        }
         String sql = "INSERT INTO PUBLIC.FRIENDS (USER_ID, OTHER_USER_ID, STATUS) VALUES(?, ?, ?);";
-        jdbcTemplate.update(sql, id, friendId, "false");
+        jdbcTemplate.update(sql, id, friendId, isFriends);
     }
 
     public void deleteFriend(long id, long friendId) {
@@ -137,6 +142,17 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "select count(*) from users where user_id = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
         return result == 1;
+    }
+
+    public boolean checkFriend(long id, long friendId) {
+        String sqlQuery = "SELECT COUNT(*) FROM PUBLIC.FRIENDS WHERE user_id = ? AND other_user_id = ?";
+        int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id, friendId);
+        return result == 1;
+    }
+
+    public void changeStatus(long id, long friendId) {
+        String sqlQuery = "UPDATE PUBLIC.FRIENDS SET STATUS=? WHERE USER_ID=? AND OTHER_USER_ID=?; ";
+        jdbcTemplate.update(sqlQuery, true, id, friendId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {
