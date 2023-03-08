@@ -20,7 +20,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User findUser(int id) {
+    public User findUser(long id) {
         return userStorage.findUser(id);
     }
 
@@ -38,26 +38,23 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public void deleteUser(int id) {
-        for (Long friendsId : userStorage.findUser(id).getFriends()) {
-            userStorage.findUser(friendsId).getFriends().removeIf(tempId -> tempId == id);
-        }
+    public void deleteUser(long id) {
         userStorage.deleteUser(id);
     }
 
-    public void addFriend(int id, int friendId) {
+    public void addFriend(long id, long friendId) {
         userStorage.addFriend(id, friendId);
     }
 
-    public void deleteFriend(int id, int friendId) {
+    public void deleteFriend(long id, long friendId) {
         userStorage.deleteFriend(id, friendId);
     }
 
-    public Collection<User> getFriends(int id) {
+    public Collection<User> getFriends(long id) {
         return userStorage.getFriends(id);
     }
 
-    public Collection<User> getCommonFriends(int id, int otherId) {
+    public Collection<User> getCommonFriends(long id, long otherId) {
         return userStorage.getCommonFriends(id, otherId);
     }
 

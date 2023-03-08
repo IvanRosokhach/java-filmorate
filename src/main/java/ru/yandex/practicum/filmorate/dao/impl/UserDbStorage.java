@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -30,14 +29,18 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User findUser(long id) {
         String sql = "SELECT USER_ID, EMAIL, LOGIN, NAME, BIRTHDAY FROM PUBLIC.USERS WHERE USER_ID=?;";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
-        if (userRows.next()) {
-            User user = new User(
-                    userRows.getLong("user_id"),
-                    userRows.getString("email"),
-                    userRows.getString("login"),
-                    userRows.getString("name"),
-                    userRows.getDate("birthday").toLocalDate());
+        if (exists(id)) {
+            User user = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeUser(rs), id);
+
+//        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, id);
+//        if (userRows.next()) {
+//            User user = new User(
+//                    userRows.getLong("user_id"),
+//                    userRows.getString("email"),
+//                    userRows.getString("login"),
+//                    userRows.getString("name"),
+//                    userRows.getDate("birthday").toLocalDate());
+
             log.info("Найден пользователь: {} {}", user.getId(), user.getName());
             return user;
         } else {
@@ -63,17 +66,18 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         long tempId = user.getId();
-        if (!exists(tempId)) {
+        if (exists(tempId)) {
+            String updateSql = "UPDATE PUBLIC.USERS SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?;";
+            jdbcTemplate.update(updateSql,
+                    user.getEmail(),
+                    user.getLogin(),
+                    user.getName(),
+                    Date.valueOf(user.getBirthday()),
+                    tempId);
+            return findUser(tempId);
+        } else {
             throw new NotFoundException("Пользователь с идентификатором " + tempId + " не найден.");
         }
-        String updateSql = "UPDATE PUBLIC.USERS SET EMAIL=?, LOGIN=?, NAME=?, BIRTHDAY=? WHERE USER_ID=?;";
-        jdbcTemplate.update(updateSql,
-                user.getEmail(),
-                user.getLogin(),
-                user.getName(),
-                Date.valueOf(user.getBirthday()),
-                tempId);
-        return findUser(tempId);
     }
 
     @Override

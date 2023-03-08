@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS films (
         description varchar(200) NOT NULL,
         releaseDate date NOT NULL,
         duration int NOT NULL,
-        rating_id int NOT NULL 
+        rating_id int
 );
 
 CREATE TABLE IF NOT EXISTS rating (

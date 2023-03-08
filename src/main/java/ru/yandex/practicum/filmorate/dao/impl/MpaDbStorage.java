@@ -45,7 +45,7 @@ public class MpaDbStorage implements MpaStorage {
         return result == 1;
     }
 
-    private Mpa makeMpa(ResultSet rs) throws SQLException {
+    Mpa makeMpa(ResultSet rs) throws SQLException {
         return new Mpa(rs.getInt("rating_id"), rs.getString("rating_name"));
     }
 
