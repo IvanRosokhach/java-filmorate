@@ -1,20 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Builder
 @Data
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Film {
 
     private long id;
@@ -27,31 +31,8 @@ public class Film {
     @NotNull
     @Positive(message = "Продолжительность фильма должна быть положительной.")
     private int duration;
-//    @JsonProperty("rate")
-    private final Set<Long> likes = new HashSet<>();
     private Mpa mpa;
     private List<Genre> genres = new ArrayList<>();
-
-    public Film() {
-    }
-
-    public Film(long id, String name, String description, LocalDate releaseDate, int duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
-
-    public Film(long id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
-
 
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
@@ -59,7 +40,8 @@ public class Film {
         values.put("description", description);
         values.put("releaseDate", releaseDate);
         values.put("duration", duration);
-        values.put("rating_id", mpa.getId()); //?
+        values.put("rating_id", mpa.getId());
         return values;
     }
+
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -13,8 +14,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Builder
 @Data
-@AllArgsConstructor
 public class User {
 
     private long id;
@@ -27,6 +28,7 @@ public class User {
     @NotNull
     @Past(message = "Дата рождения не может быть в будущем.")
     private final LocalDate birthday;
+    @JsonIgnore
     private final Set<Long> friends = new HashSet<>();
 
     public Map<String, Object> toMap() {

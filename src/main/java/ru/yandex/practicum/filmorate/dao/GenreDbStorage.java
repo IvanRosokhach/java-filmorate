@@ -1,6 +1,5 @@
-package ru.yandex.practicum.filmorate.dao.impl;
+package ru.yandex.practicum.filmorate.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-@Slf4j
 @Component
 @Primary
 public class GenreDbStorage implements GenreStorage {
@@ -26,7 +24,7 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Genre findGenre(int id) {
         if (exists(id)) {
-            String sql = "SELECT * FROM PUBLIC.genre WHERE genre_ID = ?;";
+            String sql = "SELECT * FROM genre WHERE genre_id = ?;";
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeGenre(rs), id);
         } else {
             throw new NotFoundException("Такого жанра нет");
@@ -35,18 +33,21 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> findAllGenres() {
-        String sql = "SELECT * FROM PUBLIC.genre order by genre_id;";
+        String sql = "SELECT * FROM genre ORDER BY genre_id;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs));
     }
 
     public boolean exists(long id) {
-        String sqlQuery = "select count(*) from genre where genre_id = ?";
+        String sqlQuery = "SELECT COUNT(*) FROM genre WHERE genre_id = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
         return result == 1;
     }
 
     public Genre makeGenre(ResultSet rs) throws SQLException {
-        return new Genre(rs.getInt("genre_id"), rs.getString("genre_name"));
+        return Genre.builder()
+                .id(rs.getInt("genre_id"))
+                .name(rs.getString("genre_name"))
+                .build();
     }
 
 }

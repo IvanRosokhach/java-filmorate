@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,7 +30,7 @@ public class FilmService {
         return filmStorage.findFilm(id);
     }
 
-    public List<Film> findPopularFilms(int count) {
+    public Collection<Film> findPopularFilms(int count) {
         return filmStorage.findPopularFilms(count);
     }
 
@@ -64,7 +62,5 @@ public class FilmService {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
     }
-
-
 
 }

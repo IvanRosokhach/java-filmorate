@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS genre (
 );
 
 CREATE TABLE IF NOT EXISTS film_genre (
-        film_id int REFERENCES films(film_id),
+        film_id int REFERENCES films(film_id) ON DELETE CASCADE,
         genre_id int REFERENCES genre(genre_id)
 );
 
@@ -34,12 +34,11 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS likes (
-        film_id int REFERENCES films(film_id),
-        user_id int REFERENCES users(user_id)
+        film_id int REFERENCES films(film_id) ON DELETE CASCADE,
+        user_id int REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS friends (
-        user_id int REFERENCES users(user_id),
-        other_user_id int REFERENCES users(user_id),
-        status boolean NOT NULL
+        user_id int REFERENCES users(user_id) ON DELETE CASCADE,
+        other_user_id int REFERENCES users(user_id) ON DELETE CASCADE
 );

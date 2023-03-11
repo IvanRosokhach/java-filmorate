@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public interface UserStorage {
 
     Map<Long, User> userData = new HashMap<>();
+    Map<Long, Set<Long>> friends = new TreeMap<>();
+    String notFoundUser = "Пользователь с id = %s не найден.";
 
     User findUser(long id);
 

@@ -1,6 +1,5 @@
-package ru.yandex.practicum.filmorate.dao.impl;
+package ru.yandex.practicum.filmorate.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
-@Slf4j
 @Component
 @Primary
 public class MpaDbStorage implements MpaStorage {
@@ -26,7 +24,7 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Mpa findMpa(int id) {
         if (exists(id)) {
-            String sql = "SELECT * FROM PUBLIC.RATING WHERE RATING_ID = ?;";
+            String sql = "SELECT * FROM rating WHERE rating_id = ?;";
             return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeMpa(rs), id);
         } else {
             throw new NotFoundException("Такого рейтинга нет");
@@ -35,18 +33,21 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> findAllMpa() {
-        String sql = "SELECT * FROM PUBLIC.RATING;";
+        String sql = "SELECT * FROM rating;";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeMpa(rs));
     }
 
     public boolean exists(long id) {
-        String sqlQuery = "select count(*) from rating where rating_id = ?";
+        String sqlQuery = "SELECT COUNT(*) FROM rating WHERE rating_id = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
         return result == 1;
     }
 
     Mpa makeMpa(ResultSet rs) throws SQLException {
-        return new Mpa(rs.getInt("rating_id"), rs.getString("rating_name"));
+        return Mpa.builder()
+                .id(rs.getInt("rating_id"))
+                .name(rs.getString("rating_name"))
+                .build();
     }
 
 }
