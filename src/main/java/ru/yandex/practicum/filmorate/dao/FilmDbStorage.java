@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -46,15 +45,10 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * FROM FILMS AS F " +
                 "LEFT OUTER JOIN RATING AS R ON R.RATING_ID = F.RATING_ID " +
                 "WHERE FILM_ID=?;";
-        if (exists(id)) {
-            Film film;
-            film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
-            log.info("Найден фильм: {}.", film);
-            return film;
-        } else {
-            log.info("Фильм с идентификатором {} не найден.", id);
-            throw new NotFoundException(String.format(notFoundFilm, id));
-        }
+        exists(id);
+        Film film = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeFilm(rs), id);
+        log.info("Найден фильм: {}.", film);
+        return film;
     }
 
     @Override
@@ -84,24 +78,20 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         long tempId = film.getId();
-        if (exists(tempId)) {
-            String updateSql = "UPDATE FILMS SET TITEL=?, DESCRIPTION=?, RELEASEDATE=?, DURATION=?, RATING_ID=? " +
-                    "WHERE FILM_ID=?;";
-            jdbcTemplate.update(updateSql,
-                    film.getName(),
-                    film.getDescription(),
-                    Date.valueOf(film.getReleaseDate()),
-                    film.getDuration(),
-                    film.getMpa().getId(),
-                    tempId);
-            updateGenreForFilm(film.getId(), film.getGenres());
-            Film tempFilm = findFilm(tempId);
-            log.info("Фильм обновлен: {}.", tempFilm);
-            return tempFilm;
-        } else {
-            log.info("Фильм с идентификатором {} не найден.", film.getId());
-            throw new NotFoundException(String.format(notFoundFilm, tempId));
-        }
+        exists(tempId);
+        String updateSql = "UPDATE FILMS SET TITEL=?, DESCRIPTION=?, RELEASEDATE=?, DURATION=?, RATING_ID=? " +
+                "WHERE FILM_ID=?;";
+        jdbcTemplate.update(updateSql,
+                film.getName(),
+                film.getDescription(),
+                Date.valueOf(film.getReleaseDate()),
+                film.getDuration(),
+                film.getMpa().getId(),
+                tempId);
+        updateGenreForFilm(film.getId(), film.getGenres());
+        Film tempFilm = findFilm(tempId);
+        log.info("Фильм обновлен: {}.", tempFilm);
+        return tempFilm;
     }
 
     private void updateGenreForFilm(long filmId, List<Genre> genres) {
@@ -117,25 +107,15 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteFilm(long id) {
-        if (exists(id)) {
-            jdbcTemplate.update("DELETE FROM FILMS WHERE FILM_ID=?", id);
-            log.info("Фильм с id = {} удален.", id);
-        } else {
-            log.info("Фильм с идентификатором {} не найден.", id);
-            throw new NotFoundException(String.format(notFoundFilm, id));
-        }
+        exists(id);
+        jdbcTemplate.update("DELETE FROM FILMS WHERE FILM_ID=?", id);
+        log.info("Фильм с id = {} удален.", id);
     }
 
     @Override
     public void addLike(long filmId, long userId) {
-        if (!exists(filmId)) {
-            log.info("Фильм с идентификатором {} не найден.", filmId);
-            throw new NotFoundException(String.format(notFoundFilm, filmId));
-        }
-        if (!userDbStorage.exists(userId)) {
-            log.info("Пользователь с идентификатором {} не найден.", userId);
-            throw new NotFoundException(String.format(UserStorage.notFoundUser, userId));
-        }
+        exists(filmId);
+        userDbStorage.exists(userId);
         String sql = "INSERT INTO LIKES (FILM_ID, USER_ID) VALUES(?, ?);";
         jdbcTemplate.update(sql, filmId, userId);
         log.info("Лайк добавлен.");
@@ -143,14 +123,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteLike(long filmId, long userId) {
-        if (!exists(filmId)) {
-            log.info("Фильм с идентификатором {} не найден.", filmId);
-            throw new NotFoundException(String.format(notFoundFilm, filmId));
-        }
-        if (!userDbStorage.exists(userId)) {
-            log.info("Пользователь с идентификатором {} не найден.", userId);
-            throw new NotFoundException(String.format(UserStorage.notFoundUser, userId));
-        }
+        exists(filmId);
+        userDbStorage.exists(userId);
         String sql = "DELETE FROM LIKES WHERE FILM_ID=? AND USER_ID=?;";
         jdbcTemplate.update(sql, filmId, userId);
         log.info("Лайк удален.");
@@ -173,6 +147,9 @@ public class FilmDbStorage implements FilmStorage {
     public boolean exists(long id) {
         String sqlQuery = "SELECT COUNT(*) FROM FILMS WHERE FILM_ID=?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
+        if (result != 1) {
+            throw new NotFoundException(String.format(notFoundFilm, id));
+        }
         return result == 1;
     }
 
