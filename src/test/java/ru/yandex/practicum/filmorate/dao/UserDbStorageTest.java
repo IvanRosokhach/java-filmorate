@@ -34,7 +34,7 @@ class UserDbStorageTest {
 
         User user1 = userDbStorage.createUser(tempUser1);
 
-        assertEquals(1, user1.getId());
+        assertEquals(3, user1.getId());
         assertEquals(tempUser1.getEmail(), user1.getEmail());
         assertEquals(tempUser1.getLogin(), user1.getLogin());
         assertEquals(tempUser1.getName(), user1.getName());
@@ -52,7 +52,7 @@ class UserDbStorageTest {
                 .build();
 
         user1 = userDbStorage.updateUser(tempUserForUpdate);
-        assertEquals(1, user1.getId());
+        assertEquals(3, user1.getId());
         assertEquals("user1@mail.ru", user1.getEmail());
         assertEquals("User1", user1.getLogin());
         assertEquals("User1", user1.getName());
@@ -94,7 +94,7 @@ class UserDbStorageTest {
         userDbStorage.addFriend(user1.getId(), user3.getId());
         userDbStorage.addFriend(user2.getId(), user3.getId());
 
-        Collection<User> commonFriends = userDbStorage.getCommonFriends(1, 2);
+        Collection<User> commonFriends = userDbStorage.getCommonFriends(user1.getId(), user2.getId());
         assertTrue(commonFriends.contains(user3));
 
         userDbStorage.deleteFriend(user1.getId(), user2.getId());

@@ -136,6 +136,8 @@ class FilmDbStorageTest {
 
         List<Film> popularFilms5 = (List<Film>) filmDbStorage.findPopularFilms(10);
         assertEquals(1, popularFilms5.get(0).getId());
+        userDbStorage.deleteUser(user1.getId());
+        userDbStorage.deleteUser(user2.getId());
     }
 
 }
