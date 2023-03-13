@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -18,53 +16,44 @@ public class FilmService {
 
     private static final LocalDate startCinema = LocalDate.of(1895, 12, 28);
     private final FilmStorage filmStorage;
-    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
+    public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
-        this.userService = userService;
     }
 
     public Collection<Film> findAllFilms() {
         return filmStorage.findAllFilms();
     }
 
-    public Film findFilm(int id) {
+    public Film findFilm(long id) {
         return filmStorage.findFilm(id);
     }
 
-    public List<Film> findPopularFilms(int count) {
-        return filmStorage.findAllFilms().stream()
-                .sorted(this::compare)
-                .limit(count)
-                .collect(Collectors.toList());
+    public Collection<Film> findPopularFilms(int count) {
+        return filmStorage.findPopularFilms(count);
     }
 
     public Film createFilm(Film film) {
         validate(film);
-        filmStorage.createFilm(film);
-        return film;
+        return filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
         validate(film);
-        filmStorage.updateFilm(film);
-        return film;
+        return filmStorage.updateFilm(film);
     }
 
-    public void deleteFilm(int id) {
+    public void deleteFilm(long id) {
         filmStorage.deleteFilm(id);
     }
 
-    public void addLike(int id, int userId) {
-        filmStorage.findFilm(id).getLikes().add(userService.findUser(userId).getId());
-        log.info("Лайк добавлен.");
+    public void addLike(long id, long userId) {
+        filmStorage.addLike(id, userId);
     }
 
-    public void deleteLike(int id, int userId) {
-        filmStorage.findFilm(id).getLikes().remove(userService.findUser(userId).getId());
-        log.info("Лайк удален.");
+    public void deleteLike(long id, long userId) {
+        filmStorage.deleteLike(id, userId);
     }
 
     private void validate(Film film) {
@@ -72,10 +61,6 @@ public class FilmService {
             log.info("Дата релиза: {} — должна быть не раньше 28 декабря 1895 года.", film.getReleaseDate());
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года.");
         }
-    }
-
-    private int compare(Film film0, Film film1) {
-        return -1 * (film0.getLikes().size() - film1.getLikes().size());
     }
 
 }
